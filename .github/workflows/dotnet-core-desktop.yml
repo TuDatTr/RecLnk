@@ -57,7 +57,6 @@ jobs:
 
     env:
       Solution_Name: RecLnk.sln   # Replace with your solution name, i.e. MyWpfApp.sln.
-      Wap_Project_Directory: RecLnk
 
     steps:
     - name: Checkout
@@ -100,10 +99,6 @@ jobs:
         Appx_Bundle_Platforms: x86|x64
         Appx_Package_Build_Mode: StoreUpload
         Configuration: ${{ matrix.configuration }}
-
-    # Remove the pfx
-    - name: Remove the pfx
-      run: Remove-Item -path $env:Wap_Project_Directory\$env:Signing_Certificate
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-artifact
     - name: Upload build artifacts
