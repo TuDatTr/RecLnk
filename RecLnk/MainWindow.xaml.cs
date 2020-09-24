@@ -1,6 +1,7 @@
 ﻿using IWshRuntimeLibrary;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -45,11 +46,15 @@ namespace RecLnk
 
         private void ChooseFolder()
         {
-            var dialog = new Microsoft.Win32.SaveFileDialog();
-            dialog.InitialDirectory = tbTarget.Text; // Use current value for initial dir
-            dialog.Title = "Select a Directory"; // instead of default "Save As"
-            dialog.Filter = "Directory|*.this.directory"; // Prevents displaying files
-            dialog.FileName = "select"; // Filename will then be "select.this.directory"
+            setProgress("Scanning files...");
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
+            {
+                InitialDirectory = tbTarget.Text, // Use current value for initial dir
+                Title = "Select a Directory", // instead of default "Save As"
+                Filter = "Directory|*.this.directory", // Prevents displaying files
+                FileName = "select" // Filename will then be "select.this.directory"
+            };
+            Microsoft.Win32.SaveFileDialog dialog = saveFileDialog;
             if (dialog.ShowDialog() == true)
             {
                 string path = dialog.FileName;
@@ -92,6 +97,7 @@ namespace RecLnk
                 {
                     tbLog.Text += file + "\r\n";
                 }
+                setProgress("Now press the \"Go!\" button.");
                 return files.ToList();
             } catch (Exception)
             {
@@ -100,22 +106,37 @@ namespace RecLnk
             }
         }
 
+        private void setProgress(string prog)
+        {
+            lblProgress.Text = prog;
+        }
         private void btnRun_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                setProgress("Running...");
                 int sampleSize = Convert.ToInt32(tbCount.Text);
                 if (sampleSize <= maxFileCount)
                 {
-                    var dirPath = tbTarget.Text;
+                    var dirPath = AppDomain.CurrentDomain.BaseDirectory;
+                    var date = DateTime.Now.ToString("yyyy-MM-dd-HH-mm");
+                    var targetDir = System.IO.Path.Combine(dirPath, new DirectoryInfo(tbTarget.Text).Name, date);
                     var fileList = tbLog.Text.Split("\r\n").ToList();
                     fileList = Shuffle(fileList);
                     string lnkPath = "";
+                    System.IO.Directory.CreateDirectory(targetDir);
                     for (int i = 0; i < sampleSize; i++)
                     {
-                        lnkPath = System.IO.Path.Combine(dirPath, System.IO.Path.GetFileName(fileList[i])) + ".lnk";
+                        lnkPath = System.IO.Path.Combine(targetDir, System.IO.Path.GetFileName(fileList[i])) + ".lnk";
                         CreateShortcut(fileList[i], lnkPath);
                     }
+                    ProcessStartInfo startInfo = new ProcessStartInfo
+                    {
+                        Arguments = targetDir,
+                        FileName = "explorer.exe"
+                    };
+                    Process.Start(startInfo);
+                    setProgress("Done.");
                 }
                 else
                 {
@@ -132,6 +153,7 @@ namespace RecLnk
         {
             if (e.Key == Key.Enter)
             {
+                setProgress("Scanning files...");
                 var dirPath = tbTarget.Text;
                 var fileList = getRecursiveFiles(dirPath);
                 if (fileList != null)
@@ -149,6 +171,11 @@ namespace RecLnk
         {
             if (tbTarget.Text == "Directory...")
                 tbTarget.Text = "";
+        }
+
+        private void FormMain_Initialized(object sender, EventArgs e)
+        {
+            setProgress("Ready...");
         }
     }
 }
