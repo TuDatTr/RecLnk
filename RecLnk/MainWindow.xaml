@@ -5,16 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RecLnk"
         mc:Ignorable="d"
-        Title="MainWindow" Height="300" Width="370" ResizeMode="CanResize" MaxWidth="370" MinWidth="370" MinHeight="300" MaxHeight="300" Initialized="FormMain_Initialized">
-    <Grid x:Name="grdMain" RenderTransformOrigin="0.493,0.496" Height="263" VerticalAlignment="Top">
+        Title="MainWindow" Height="150" Width="370" ResizeMode="CanResize" MaxWidth="370" MinWidth="370" MinHeight="150" MaxHeight="150" Initialized="FormMain_Initialized">
+    <Grid x:Name="grdMain" RenderTransformOrigin="0.493,0.496" VerticalAlignment="Top">
         <TextBlock x:Name="lblTarget" TextWrapping="Wrap" Margin="11,10,239,0" VerticalAlignment="Top"><Run Text="Target "/><Run Language="de-de" Text="d"/><Run Text="irectory"/></TextBlock>
-        <TextBox x:Name="tbTarget" Text="Directory..." TextWrapping="Wrap" Margin="11,33,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="175" MinWidth="175" MaxWidth="175" MinHeight="17.96" MaxHeight="17.96" MaxLines="1" KeyUp="tbTarget_KeyUp" GotFocus="tbTarget_GotFocus"/>
-        <Button x:Name="btnDirChooser" Content="..." Margin="185,33,0,0" Click="btnDirChooser_Click" VerticalAlignment="Top" Height="18" HorizontalAlignment="Left" Width="34"/>
-        <Button x:Name="btnRun" Content="Go!" Margin="11,56,319,0" Click="btnRun_Click" VerticalAlignment="Top"/>
-        <TextBox x:Name="tbLog" Margin="10,102,10,0" TextWrapping="Wrap" ScrollViewer.CanContentScroll="True" HorizontalScrollBarVisibility="Auto" Grid.IsSharedSizeScope="True" Height="131" VerticalAlignment="Top"/>
-        <TextBlock x:Name="lblLog" Margin="11,81,308,0" TextWrapping="Wrap" RenderTransformOrigin="0.578,0.567" Height="16" VerticalAlignment="Top"><Run Language="de-de" Text="Log"/></TextBlock>
+        <TextBox x:Name="tbTarget" Text="Directory..." TextWrapping="Wrap" Margin="11,33,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="175" MinWidth="175" MaxWidth="175" MinHeight="17.96" MaxHeight="17.96" MaxLines="1" KeyUp="TbTarget_KeyUp" GotFocus="TbTarget_GotFocus"/>
+        <Button x:Name="btnDirChooser" Content="..." Margin="185,33,0,0" Click="BtnDirChooser_Click" VerticalAlignment="Top" Height="18" HorizontalAlignment="Left" Width="34"/>
+        <Button x:Name="btnRun" Content="Go!" Margin="11,56,319,0" Click="BtnRun_Click" VerticalAlignment="Top"/>
         <TextBlock x:Name="lblCount" TextWrapping="Wrap" Margin="0,10,26,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="90"><Run Language="de-de" Text="Sample size"/></TextBlock>
-        <TextBox x:Name="tbCount" Text="0" TextWrapping="Wrap" Margin="0,33,80,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="36"/>
-        <TextBlock x:Name="lblProgress" TextWrapping="Wrap" Margin="11,237,10,0" VerticalAlignment="Top"><Run Language="de-de" Text="Progress..."/></TextBlock>
+        <TextBox x:Name="tbCount" Text="0" TextWrapping="Wrap" Margin="0,33,52,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="64"/>
+        <TextBlock x:Name="lblProgress" TextWrapping="Wrap" Margin="10,81,11,0" VerticalAlignment="Top"><Run Language="de-de" Text="Progress..."/></TextBlock>
     </Grid>
 </Window>

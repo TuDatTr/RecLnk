@@ -19,6 +19,8 @@ namespace RecLnk
             InitializeComponent();
         }
         int maxFileCount = 0;
+        readonly Stopwatch s = new Stopwatch();
+        IEnumerable<string> fileList;
         public static void CreateShortcut(string sourceFileLocation, string lnkPath)
         {
             WshShell shell = new WshShell();
@@ -29,24 +31,21 @@ namespace RecLnk
             shortcut.TargetPath = sourceFileLocation;                 // The path of the file that will launch when the shortcut is run
             shortcut.Save();                                    // Save the shortcut
         }
-        public List<string> Shuffle(List<string> list)
+
+        public IEnumerable<string> Shuffle(IEnumerable<string> list)
         {
-            Random rng = new Random();
-            int n = list.Count;
-            while (n > 1)
-            {
-                n--;
-                int k = rng.Next(n + 1);
-                string value = list[k];
-                list[k] = list[n];
-                list[n] = value;
-            }
-            return list;
+            var r = new Random();
+            var shuffledList =
+                list.
+                    Select(x => new { Number = r.Next(), Item = x }).
+                    OrderBy(x => x.Number).
+                    Select(x => x.Item).
+                    Take(maxFileCount-1); // Assume first @size items is fine
+            return shuffledList.ToList();
         }
 
         private void ChooseFolder()
         {
-            setProgress("Scanning files...");
             Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
                 InitialDirectory = tbTarget.Text, // Use current value for initial dir
@@ -71,34 +70,30 @@ namespace RecLnk
             }
         }
 
-        private void btnDirChooser_Click(object sender, RoutedEventArgs e)
+        private void BtnDirChooser_Click(object sender, RoutedEventArgs e)
         {
             ChooseFolder();
             var dirPath = tbTarget.Text;
-            var fileList = getRecursiveFiles(dirPath);
-            if (fileList != null)
-            {
-                if (fileList.Count != 0)
-                {
-                    tbCount.Text = fileList.Count.ToString();
-                    maxFileCount = fileList.Count;
-                }
-            }
+            fileList = GetRecursiveFiles(dirPath);
         }
 
-        private List<string> getRecursiveFiles(string dirPath)
+        private IEnumerable<string> GetRecursiveFiles(string dirPath)
         {
             try
             {
-                List<string> fileList = new List<string>();
-                string[] files = Directory.GetFiles(dirPath, "*.*", SearchOption.AllDirectories);
-                tbLog.Clear();
-                foreach (var file in files)
+                var fileList = Directory.EnumerateFiles(dirPath, "*.*", SearchOption.AllDirectories);
+                int fileCount = 0;
+                foreach (var file in fileList)
                 {
-                    tbLog.Text += file + "\r\n";
+                    fileCount++;
                 }
-                setProgress("Now press the \"Go!\" button.");
-                return files.ToList();
+                SetProgress("Now press the \"Go!\" button.");
+                if (fileList != null)
+                {
+                    tbCount.Text = fileCount.ToString();
+                    maxFileCount = fileCount;
+                }
+                return fileList;
             } catch (Exception)
             {
                 MessageBox.Show("Please enter a valid path");
@@ -106,29 +101,27 @@ namespace RecLnk
             }
         }
 
-        private void setProgress(string prog)
+        private void SetProgress(string prog)
         {
             lblProgress.Text = prog;
         }
-        private void btnRun_Click(object sender, RoutedEventArgs e)
+        private void BtnRun_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                setProgress("Running...");
+            //try
+            //{
+                SetProgress("Running...");
                 int sampleSize = Convert.ToInt32(tbCount.Text);
                 if (sampleSize <= maxFileCount)
                 {
                     var dirPath = AppDomain.CurrentDomain.BaseDirectory;
                     var date = DateTime.Now.ToString("yyyy-MM-dd-HH-mm");
                     var targetDir = System.IO.Path.Combine(dirPath, new DirectoryInfo(tbTarget.Text).Name, date);
-                    var fileList = tbLog.Text.Split("\r\n").ToList();
                     fileList = Shuffle(fileList);
-                    string lnkPath = "";
                     System.IO.Directory.CreateDirectory(targetDir);
                     for (int i = 0; i < sampleSize; i++)
                     {
-                        lnkPath = System.IO.Path.Combine(targetDir, System.IO.Path.GetFileName(fileList[i])) + ".lnk";
-                        CreateShortcut(fileList[i], lnkPath);
+                        string lnkPath = System.IO.Path.Combine(targetDir, System.IO.Path.GetFileName(fileList.ElementAt(i)) + ".lnk");
+                        CreateShortcut(fileList.ElementAt(i), lnkPath);
                     }
                     ProcessStartInfo startInfo = new ProcessStartInfo
                     {
@@ -136,38 +129,32 @@ namespace RecLnk
                         FileName = "explorer.exe"
                     };
                     Process.Start(startInfo);
-                    setProgress("Done.");
+                    SetProgress("Done.");
                 }
                 else
                 {
                     MessageBox.Show("Sample size too big.\nMax sample size: " + maxFileCount);
+                    SetProgress("Now press the \"Go!\" button.");
                 }
-            }catch (Exception)
-            {
-                MessageBox.Show("Please enter a valid sample size.\nMax sample size: " + maxFileCount);
-            }
+            //}catch (Exception)
+            //{
+            //    MessageBox.Show("Please enter a valid sample size.\nMax sample size: " + maxFileCount);
+            //    setProgress("Now press the \"Go!\" button.");
+            //}
             
         }
 
-        private void tbTarget_KeyUp(object sender, KeyEventArgs e)
+        private void TbTarget_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                setProgress("Scanning files...");
+                SetProgress("Scanning files...");
                 var dirPath = tbTarget.Text;
-                var fileList = getRecursiveFiles(dirPath);
-                if (fileList != null)
-                {
-                    if (fileList.Count != 0)
-                    {
-                        tbCount.Text = fileList.Count.ToString();
-                        maxFileCount = fileList.Count;
-                    }
-                }
+                fileList = GetRecursiveFiles(dirPath);
             }
         }
 
-        private void tbTarget_GotFocus(object sender, RoutedEventArgs e)
+        private void TbTarget_GotFocus(object sender, RoutedEventArgs e)
         {
             if (tbTarget.Text == "Directory...")
                 tbTarget.Text = "";
@@ -175,7 +162,7 @@ namespace RecLnk
 
         private void FormMain_Initialized(object sender, EventArgs e)
         {
-            setProgress("Ready...");
+            SetProgress("Ready...");
         }
     }
 }
